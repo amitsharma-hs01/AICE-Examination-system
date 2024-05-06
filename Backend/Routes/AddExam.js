@@ -19,7 +19,7 @@ router.post("/add-exam", async (req, res) => {
     const exist = await ExamSchema.findOne({ subjectID, Branch });
 
     if (exist) {
-      return res.status(400).send({ message: "Exam already exists" });
+      return res.status(400).json({ message: "Exam already exists" });
     }
 
     let Exam = new ExamSchema({
@@ -36,10 +36,10 @@ router.post("/add-exam", async (req, res) => {
 
     return res
       .status(200)
-      .send({ message: "Exam Added Completed Succesfully" });
+      .json({ message: "Exam Added Completed Succesfully" });
   } catch (error) {
-    res.status(500).json({ message: "you messed up man" });
     console.log(error);
+    return res.status(500).json({ message: "Failed To Add Exam" });
   }
 });
 

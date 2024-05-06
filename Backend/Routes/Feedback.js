@@ -13,10 +13,10 @@ router.post("/post/feedback", async (req, res) => {
     });
     await newFeedback.save();
 
-    return res.status(200).send({ message: "Feedback Submitted" });
+    return res.status(200).josn({ message: "Feedback Submitted" });
   } catch (error) {
-    res.status(500).json({ message: "you messed up man" });
     console.log(error);
+    return res.status(500).json({ message: "Server Error"});
   }
 });
 
@@ -26,9 +26,9 @@ router.get("/feedback/:facultyName", async (req, res) => {
     const facultyFeedback = await FeedbackSchema.find({
       facultyName: facultyName,
     });
-    res.json(facultyFeedback);
-  } catch (err) {
-    res.status(500).send(err);
+    return res.json(facultyFeedback);
+  } catch (error) {
+    return res.status(500).json({error: "Server Error"});
   }
 });
 
