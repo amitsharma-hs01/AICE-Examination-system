@@ -7,7 +7,7 @@ type UserProviderProps = {
 export const RequireAdminAuth = ({ children }: UserProviderProps) => {
   const { adminToken } = useContext(AdminContext);
   if (!adminToken) {
-    return <Navigate to="/faculty/login" />;
+    return <Navigate to="/" />;
   }
   return children;
 };
