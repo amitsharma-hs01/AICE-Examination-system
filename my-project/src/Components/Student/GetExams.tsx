@@ -17,8 +17,6 @@ export default function GetExams() {
   const [exams, setExams] = useState<Exam[]>([]);
   const { subjectIDS } = useResults();
   const [Branch] = useState(localStorage.getItem("studentbranch"));
-  console.log(subjectIDS);
-  console.log(exams);
   useEffect(() => {
     axios
       .get(`http://localhost:8088/user/get-exams/${Branch}`)
@@ -33,10 +31,10 @@ export default function GetExams() {
       </>
     );
   }
-  const examsNotIncluded = exams.filter((item) => {
-    !(subjectIDS as string[]).includes(item.subjectID);
-  });
-  console.log(examsNotIncluded.length);
+  const examsNotIncluded = exams.filter((item) =>
+    !(subjectIDS as string[]).includes(item.subjectID));
+
+  console.log("exams not included--->",examsNotIncluded)
   return (
     <>
       <StudentNav />

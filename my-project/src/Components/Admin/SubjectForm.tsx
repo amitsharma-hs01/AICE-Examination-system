@@ -1,43 +1,47 @@
-import axios, { AxiosResponse } from "axios";
-import { useForm } from "react-hook-form";
+import axios from "axios";
+import { useState } from "react";
 import { IFacultyList } from "./FacultyList";
-interface FormData {
-  SubjectID: string;
-  SubjectName: string;
-}
+
 interface SubjectFormProps {
   selectedFaculty: IFacultyList | null;
   setFaculty: React.Dispatch<React.SetStateAction<IFacultyList[]>>;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
 export default function SubjectForm({
   selectedFaculty,
   setFaculty,
   setShowModal,
 }: SubjectFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>();
-  console.log(selectedFaculty);
+  const [subjectID, setSubjectID] = useState<string>("");
+  const [subjectName, setSubjectName] = useState<string>("");
+  const [errors, setErrors] = useState<{ SubjectID?: string; SubjectName?: string }>({});
 
-  const onSubmit = async (data: FormData) => {
+  console.log("selected faculty",selectedFaculty);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     try {
       if (selectedFaculty) {
-        await axios
-          .patch(
-            `http://localhost:8088/admin/add-subject/faculty/${selectedFaculty._id}`,
-            { Subjects: [data] }
-          )
-          .then((res:AxiosResponse<IFacultyList>) => {
-            console.log("add faculty res",res)
-            setFaculty((prevFaculty: IFacultyList[]) =>
-              prevFaculty.map((f: IFacultyList) =>
-                f._id === selectedFaculty._id ? res.data : f
-              )
-            );
+        if (!subjectID || !subjectName) {
+          setErrors({
+            SubjectID: !subjectID ? "Subject ID is required" : "",
+            SubjectName: !subjectName ? "Subject Name is required" : "",
           });
+          return;
+        }
+
+        const response = await axios.patch(
+          `http://localhost:8088/admin/add-subject/faculty/${selectedFaculty._id}`,
+          { Subjects: [{ SubjectID: subjectID, SubjectName: subjectName }] }
+        );
+        console.log("add faculty res", response.data);
+        setFaculty((prevFaculty: IFacultyList[]) =>
+          prevFaculty.map((f: IFacultyList) =>
+            f._id === selectedFaculty._id ? response.data : f
+          )
+        );
         setShowModal(false);
       }
     } catch (error) {
@@ -46,48 +50,40 @@ export default function SubjectForm({
   };
 
   return (
-    <form onSubmit={void handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit}>
       <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
         <div className="mb-4">
-          <label
-            htmlFor="SubjectID"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="SubjectID" className="block text-gray-700 font-bold mb-2">
             Subject ID:
           </label>
           <input
             type="text"
             id="SubjectID"
-            {...register("SubjectID", { required: true })}
+            value={subjectID}
+            onChange={(e) => setSubjectID(e.target.value)}
             className={`w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
               errors.SubjectID ? "border-red-500" : ""
             }`}
           />
           {errors.SubjectID && (
-            <span className="text-red-500 text-sm">
-              Subject name is required
-            </span>
+            <span className="text-red-500 text-sm">{errors.SubjectID}</span>
           )}
         </div>
         <div className="mb-4">
-          <label
-            htmlFor="SubjectName"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="SubjectName" className="block text-gray-700 font-bold mb-2">
             Subject Name:
           </label>
           <input
             type="text"
             id="SubjectName"
-            {...register("SubjectName", { required: true })}
+            value={subjectName}
+            onChange={(e) => setSubjectName(e.target.value)}
             className={`w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
               errors.SubjectName ? "border-red-500" : ""
             }`}
           />
           {errors.SubjectName && (
-            <span className="text-red-500 text-sm">
-              Subject name is required
-            </span>
+            <span className="text-red-500 text-sm">{errors.SubjectName}</span>
           )}
         </div>
       </div>

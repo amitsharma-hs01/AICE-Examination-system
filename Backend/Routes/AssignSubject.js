@@ -7,6 +7,7 @@ router.patch("/add-subject/faculty/:id", async (req, res) => {
   const facultyId = req.params.id;
   const newSubject = req.body.Subjects[0];
   try {
+    console.log("add subject api called",facultyId,newSubject)
     const faculty = await FacultySchema.findById(facultyId);
 
     if (!faculty) {
