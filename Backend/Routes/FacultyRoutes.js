@@ -16,10 +16,10 @@ router.post("/register", async (req, res) => {
     } = req.body;
     let exist = await FacultySchema.findOne({ facultyEmail: facultyEmail });
     if (exist) {
-      return res.status(400).send({ message: "Faculty Already Exist" });
+      return res.status(400).json({ message: "Faculty Already Exist" });
     }
     if (password != confirmPassword) {
-      return res.status(400).send({ message: "Password Mismacth" });
+      return res.status(400).json({ message: "Password Mismacth" });
     }
     let newFaculty = new FacultySchema({
       facultyName,
@@ -29,12 +29,12 @@ router.post("/register", async (req, res) => {
       confirmPassword,
     });
     await newFaculty.save();
-    res
+   return res
       .status(200)
-      .send({ message: "Faculty Registration Completed Succesfully" });
+      .json({ message: "Faculty Registration Completed Succesfully" });
   } catch (error) {
-    res.status(500).send({ message: "You Messed Up" });
     console.log(error);
+    return res.status(500).json({ error: "Server Error" });
   }
 });
 
@@ -43,13 +43,13 @@ router.post("/login", async (req, res) => {
     const { facultyEmail, password } = req.body;
     let exist = await FacultySchema.findOne({ facultyEmail: facultyEmail });
     if (!exist) {
-      return res.status(500).send("user Not found");
+      return res.status(500).json({message: "User not found"});
     }
     if (exist.status == "PENDING") {
-      return res.status(400).send({ message: "Account under approval" });
+      return res.status(400).json({ message: "Account under approval" });
     }
     if (exist.password !== password) {
-      return res.status(500).send("invalid password");
+      return res.status(500).json({ message: "Invalid Password" });
     }
     let payload = {
       user: {
@@ -62,7 +62,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send("You Messed Up !!...");
+    return res.status(500).json({ error: "Server Error"});
   }
 });
 
@@ -70,12 +70,12 @@ router.get("/dashboard", AuthMiddleware, async (req, res) => {
   try {
     let exist = await FacultySchema.findById(req.user.id);
     if (!exist) {
-      return res.status(400).send("user not found");
+      return res.status(400).json({message: "User not found"});
     }
-    res.send(exist);
+    return res.send(exist);
   } catch (error) {
     console.log(error);
-    return res.status(500).send("You Messed Up !!...");
+    return res.status(500).json({ error: "Server Error"});
   }
 });
 module.exports = router;

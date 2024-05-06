@@ -20,9 +20,9 @@ router.post("/add-exam/unit", async (req, res) => {
     const existingExam = await UnitExam.findOne({ subjectID, unit, Branch });
 
     if (existingExam) {
-      return res.status(400).send({
+      return res.status(400).json({
         message:
-          "An exam with the same subject, unit, and branch already exists",
+          "An exam with the same Subject, Unit, and Branch already exists",
       });
     }
 
@@ -41,10 +41,10 @@ router.post("/add-exam/unit", async (req, res) => {
 
     return res
       .status(200)
-      .send({ message: "Exam Added Completed Succesfully" });
+      .json({ message: "Exam Added Completed Succesfully" });
   } catch (error) {
-    res.status(500).json({ message: "you messed up man" });
     console.log(error);
+    return res.status(500).json({ error: "Failed To Add Exam" });
   }
 });
 

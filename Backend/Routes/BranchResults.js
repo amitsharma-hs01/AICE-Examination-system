@@ -7,9 +7,10 @@ router.get("/results/:branch", async (req, res) => {
   try {
     const { branch } = req.params;
     const results = await StudentResults.find({ userBranch: branch });
-    res.json(results);
+    return res.json(results);
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ error: "Server Error" });
   }
 });
 
@@ -35,9 +36,10 @@ router.get("/:studentID/:branch/:subject", async (req, res) => {
         { "Results.$": 1, _id: 0 }
       );
     }
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ error: "Server Error" });
   }
 });
 

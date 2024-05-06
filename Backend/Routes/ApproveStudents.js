@@ -9,7 +9,7 @@ router.put("/admin/:id/approve/student", async (req, res) => {
     const user = await UserSchema.findByIdAndUpdate(id, {
       status: "approved",
     });
-    res.json(user);
+    return res.json(user);
   } catch (error) {
     res.status(500).json({ error: "Failed to approve user" });
   }
@@ -21,9 +21,9 @@ router.put("/admin/:id/reject/student", async (req, res) => {
     const user = await UserSchema.findByIdAndUpdate(id, {
       status: "Rejected",
     });
-    res.json(user);
+    return res.json(user);
   } catch (error) {
-    res.status(500).json({ error: "Failed to approve user" });
+    return res.status(500).json({ error: "Failed to approve user" });
   }
 });
 

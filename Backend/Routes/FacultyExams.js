@@ -8,10 +8,10 @@ router.get("/exams/:facultyName", async (req, res) => {
   try {
     const { facultyName } = req.params;
     const exams = await ExamSchema.find({ facultyName });
-    res.send(exams);
+    return res.send(exams);
   } catch (error) {
     console.log(error);
-    res.status(500).send("No Exams Conducted");
+    return res.status(500).json({message: "No Exams Conducted"});
   }
 });
 
@@ -26,10 +26,10 @@ router.get("/result/:subjectID/:facultyName", async (req, res) => {
       },
       { "Results.$": 1 }
     );
-    res.send(results);
+    return res.json(results);
   } catch (error) {
     console.log(error);
-    res.send("Error");
+    return res.json({error: "Server Error"});
   }
 });
 

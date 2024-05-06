@@ -8,12 +8,12 @@ router.get("/student/pending", async (req, res) => {
     const userData = await UserSchema.find({ status: "PENDING" });
 
     if (userData.length < 1) {
-      res.status(200).send("No Pending Requests Available");
+      return res.status(200).json({message: "No Pending Requests Available"});
     }
-    res.send(userData);
+    return res.send(userData);
   } catch (error) {
     console.log(error);
-    return res.status(500).send("internal server Error");
+    return res.status(500).json({error: "Internal server Error"});
   }
 });
 
@@ -22,12 +22,12 @@ router.get("/student/approved", async (req, res) => {
     const userData = await UserSchema.find({ status: "approved" });
 
     if (userData.length < 1) {
-      res.status(200).send("No Pending Requests Available");
+      return res.status(200).json({message: "No Pending Requests Available"});
     }
-    res.send(userData);
+    return res.send(userData);
   } catch (error) {
     console.log(error);
-    return res.status(500).send("internal server Error");
+    return res.status(500).json({error: "internal server Error"});
   }
 });
 

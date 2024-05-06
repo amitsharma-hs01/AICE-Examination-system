@@ -7,19 +7,19 @@ router.patch("/add-subject/faculty/:id", async (req, res) => {
   const facultyId = req.params.id;
   const newSubject = req.body.Subjects[0];
   try {
-    const updatedFaculty = await FacultySchema.findOneAndUpdate(
-      { _id: facultyId },
-      { $push: { Subjects: newSubject } },
-      { new: true }
-    );
+    const faculty = await FacultySchema.findById(facultyId);
 
-    if (!updatedFaculty) {
+    if (!faculty) {
       return res.status(404).json({ message: "Faculty member not found" });
     }
-    res.json(updatedFaculty);
+
+    faculty.Subjects.push(newSubject);
+    const updatedFaculty = await faculty.save();
+
+    return res.json(updatedFaculty);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 });
 router.get("/:id/subjects", async (req, res) => {
@@ -33,10 +33,11 @@ router.get("/:id/subjects", async (req, res) => {
       subjectName: subject.SubjectName,
     }));
 
-    res.json({ subjectList });
+    return res.json({ subjectList });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    // return res.status(500).send("Server Error");
+    return res.status(500).json({ error: "Server Error" });
   }
 });
 

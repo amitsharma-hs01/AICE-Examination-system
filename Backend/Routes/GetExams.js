@@ -8,12 +8,12 @@ router.get("/get-exams/:Branch", async (req, res) => {
     const { Branch } = req.params;
     const AvailExams = await ExamSchema.find({ Branch: Branch });
     if (!AvailExams) {
-      res.status(200).send("No Exam Available");
+      return res.status(200).json({ message: "No Exam Available" });
     }
-    res.send(AvailExams);
+    return res.send(AvailExams);
   } catch (error) {
     console.log(error);
-    res.status(200).send("No Exam Available");
+    return res.status(200).json({ error: "No Exam Available"});
   }
 });
 
@@ -22,9 +22,9 @@ router.get("/exam/:id", async (req, res) => {
     const { id } = req.params;
     const ExamData = await ExamSchema.findById(id);
     if (!ExamData) {
-      res.status(200).send("No Exam Available");
+      return res.status(200).json({message: "No Exam Available"});
     }
-    res.send(ExamData);
+    return res.send(ExamData);
   } catch (error) {
     console.log(error);
   }
@@ -33,10 +33,10 @@ router.get("/exam/:id", async (req, res) => {
 router.get("/exams/:Branch/subjects", async (req, res) => {
   try {
     const subjects = await ExamSchema.find().distinct("subjectName");
-    res.json(subjects);
+    return res.json(subjects);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    return res.status(500).json({error: "Server Error" });
   }
 });
 

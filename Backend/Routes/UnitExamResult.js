@@ -16,10 +16,10 @@ router.patch("/submit/unit/result/:id", async (req, res) => {
     student[0].Results.push(newResult);
     const updatedStudent = await student[0].save();
 
-    res.json(updatedStudent);
+    return res.json(updatedStudent);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 });
 
@@ -32,10 +32,10 @@ router.get("/unit/result/:id", async (req, res) => {
       return res.status(404).json({ message: "Faculty member not found" });
     }
 
-    res.json(student[0].Results);
+    return res.json(student[0].Results);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -52,10 +52,10 @@ router.get("/unit/result/:id/:subjectID", async (req, res) => {
       return res.status(404).json({ message: "Student member not found" });
     }
 
-    res.json(filteredSubjects);
+    return res.json(filteredSubjects);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 });
 module.exports = router;
