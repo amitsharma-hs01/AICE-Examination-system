@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const UserRoutes = require("./Routes/UserRoutes");
 const AdminRoutes = require("./Routes/AdminRoutes");
-const FacultySchema = require("./Routes/FacultyRoutes");
+const FacultyRoutes = require("./Routes/FacultyRoutes");
 const PendingStudents = require("./Routes/PendingStudents");
 const ApproveStudents = require("./Routes/ApproveStudents");
 const ApproveFaculty = require("./Routes/ApproveFaculty");
@@ -35,7 +35,7 @@ app.use(
   UnitExamResult
 );
 app.use("/admin", AdminRoutes, AssignSubject, FacultyExams);
-app.use("/faculty", PendingFaculty, FacultySchema, AddExam, AddUnitExam);
+app.use("/faculty", PendingFaculty, FacultyRoutes, AddExam, AddUnitExam);
 
 app.use("", PendingStudents);
 app.use("", ApproveStudents);

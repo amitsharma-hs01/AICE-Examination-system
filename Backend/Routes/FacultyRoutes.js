@@ -21,7 +21,13 @@ router.post("/register", async (req, res) => {
     if (password != confirmPassword) {
       return res.status(400).json({ message: "Password Mismacth" });
     }
+
+    const facultyCount = await FacultySchema.countDocuments();
+
+    const facultyId = `AICE-F${facultyCount + 1}`;
+
     let newFaculty = new FacultySchema({
+      facultyId,
       facultyName,
       facultyNumber,
       facultyEmail,
@@ -29,6 +35,7 @@ router.post("/register", async (req, res) => {
       confirmPassword,
     });
     await newFaculty.save();
+    console.log(">>>>>>>>>>>>>", newFaculty);
    return res
       .status(200)
       .json({ message: "Faculty Registration Completed Succesfully" });
