@@ -1,41 +1,73 @@
 import axios, { AxiosResponse } from "axios";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import AdminNav from "./AdminNav";
 import useFeedback from "../Student/useFeedback";
-import { FacultyFormData } from "./FacultyExams";
+
 type Feedbacks = {
   _id: string;
   feedback: string;
 };
+
+interface Faculty {
+  facultyName: string;
+  facultyEmail: string;
+  facultyId:string;
+  id:string
+}
+
 export default function FacultyFeedbacks() {
   const [feedbacks, setFeedbacks] = useState<Feedbacks[]>([]);
   const [faculty] = useFeedback();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FacultyFormData>();
+  const [error, setError] = useState("");
+  const [selectedFaculty,setSelectedFaculty]=useState<Faculty|undefined>()
 
-  const onSubmit = (data: FacultyFormData) => {
-    console.log(data);
+
+
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedFaculty) {
+      setError("Faculty name is required");
+      return;
+    }
     axios
-      .get(`http://localhost:8088/user/feedback/${data.facultyName}`)
+      .post(`http://localhost:8088/user/feedback`,{
+        facultyId:selectedFaculty.facultyId
+      })
       .then((response: AxiosResponse<Feedbacks[]>) => {
         setFeedbacks(response.data);
-        console.log(response.data);
+        setError("");
       })
       .catch((err) => {
         console.log(err);
       });
   };
+
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedFacultyId = event.target.value;
+    
+    const selectedFaculty = faculty?.find((fac) =>{
+      console.log("fac id",fac.id)
+      console.log("selected id",selectedFacultyId)
+      return fac.id === selectedFacultyId});
+    if (selectedFaculty) {
+      setSelectedFaculty(selectedFaculty);
+    } else {
+      setSelectedFaculty(undefined);
+      setError("Faculty name is required");
+    }
+  };
+
+  useEffect(()=>{
+   console.log("selected--->",selectedFaculty)
+  },[selectedFaculty])
+
   return (
     <>
       <AdminNav />
       <div className="flex flex-col justify-center items-center my-10 ">
         <div className="bg-white shadow-md rounded-lg w-full max-w-2xl">
           <div className="py-4 px-8">
-            <form onSubmit={void handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={onSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="faculty"
@@ -45,21 +77,20 @@ export default function FacultyFeedbacks() {
                 </label>
                 <select
                   id="facultyName"
-                  {...register("facultyName", { required: true })}
-                  className={`border border-gray-400 rounded w-full py-2 px-3 ${
-                    errors.facultyName ? "border-red-500" : ""
-                  }`}
+                  value={selectedFaculty?.id}
+                  onChange={handleSelectChange}
+                  className={`border border-gray-400 rounded w-full py-2 px-3`}
                 >
                   <option value="">Select a faculty member</option>
                   {faculty &&
                     faculty.map((option, index) => (
-                      <option key={index} value={option.facultyName}>
+                      <option key={index} value={option.id}>
                         {option.facultyName}
                       </option>
                     ))}
                 </select>
-                {errors.facultyName && (
-                  <p className="text-red-500 mt-2">Faculty name is required</p>
+                {error && (
+                  <p className="text-red-500 mt-2">{error}</p>
                 )}
               </div>
               <div className="flex justify-center">
@@ -87,7 +118,7 @@ export default function FacultyFeedbacks() {
             </div>
           ))
         ) : (
-          <div>No Feedbacks Avaiable</div>
+          <div>No Feedbacks Available</div>
         )}
       </div>
     </>
