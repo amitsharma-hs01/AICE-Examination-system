@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { FacultyContext } from "../../Types/StoresContext";
 import { useContext } from "react";
+//@ts-ignore
+import AICELogo from "../../assets/AICELogo.jpeg"
 const FacultyNav = () => {
   const { logout } = useContext(FacultyContext);
 
@@ -13,7 +15,7 @@ const FacultyNav = () => {
               <Link to="/">
                 <img
                   className="h-8 w-auto"
-                  src="https://vishnu.edu.in/upload_news/newlogo.bmp"
+                  src={AICELogo}
                   alt="Logo"
                 />
               </Link>

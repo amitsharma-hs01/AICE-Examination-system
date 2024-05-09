@@ -1,35 +1,68 @@
 import axios from "axios";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
 import useFeedback from "./useFeedback";
 import StudentNav from "./StudentNav";
 import { AxiosOkRes } from "../../Types/FormDataTypes";
+
 interface Feedback {
   facultyName: string;
   feedback: string;
+  facultyId: string;
 }
+
 function PostFeedback() {
   const [faculty] = useFeedback();
-  console.log(faculty);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<Feedback>();
+  const [formData, setFormData] = useState<Feedback>({
+    facultyName: "",
+    feedback: "",
+    facultyId: ""
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const onSubmit = async (data:Feedback) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: "" });
+  };
+
+  const validateForm = () => {
+    const errors: { [key: string]: string } = {};
+    if (!formData.facultyName) {
+      errors.facultyName = "Faculty name is required";
+    }
+    if (!formData.feedback) {
+      errors.feedback = "Feedback message is required";
+    }
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+  
+    const selectedFaculty = faculty?.find((fac) => fac.facultyName === formData.facultyName);
+    if (!selectedFaculty) {
+      setErrors({ ...errors, facultyName: "Invalid faculty selected" });
+      return;
+    }
+  
     try {
-      const response:AxiosOkRes = await axios.post(
+      const response: AxiosOkRes = await axios.post(
         "http://localhost:8088/user/post/feedback",
-        data
+        {
+          ...formData,
+          facultyId: selectedFaculty.facultyId // Include facultyId in the request data
+        }
       );
       console.log(response.data);
       alert(response.data.message);
-      reset();
+      setFormData({ facultyName: "", feedback: "", facultyId: "" });
     } catch (error) {
       console.error(error);
     }
   };
+  
 
   return (
     <>
@@ -42,7 +75,7 @@ function PostFeedback() {
                 Submit Feedback
               </h2>
             </div>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={onSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="faculty"
@@ -52,7 +85,9 @@ function PostFeedback() {
                 </label>
                 <select
                   id="facultyName"
-                  {...register("facultyName", { required: true })}
+                  name="facultyName"
+                  value={formData.facultyName}
+                  onChange={handleInputChange}
                   className={`border border-gray-400 rounded w-full py-2 px-3 ${
                     errors.facultyName ? "border-red-500" : ""
                   }`}
@@ -66,7 +101,7 @@ function PostFeedback() {
                     ))}
                 </select>
                 {errors.facultyName && (
-                  <p className="text-red-500 mt-2">Faculty name is required</p>
+                  <p className="text-red-500 mt-2">{errors.facultyName}</p>
                 )}
               </div>
               <div>
@@ -78,15 +113,15 @@ function PostFeedback() {
                 </label>
                 <textarea
                   id="feedback"
-                  {...register("feedback", { required: true })}
+                  name="feedback"
+                  value={formData.feedback}
+                  onChange={handleInputChange}
                   className={`border border-gray-400 rounded w-full py-2 px-3 ${
                     errors.feedback ? "border-red-500" : ""
                   }`}
                 />
                 {errors.feedback && (
-                  <p className="text-red-500 mt-2">
-                    Feedback message is required
-                  </p>
+                  <p className="text-red-500 mt-2">{errors.feedback}</p>
                 )}
               </div>
               <div className="flex justify-center">

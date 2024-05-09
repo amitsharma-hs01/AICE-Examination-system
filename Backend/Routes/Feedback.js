@@ -33,10 +33,12 @@ router.post("/post/feedback", async (req, res) => {
 //   }
 // });
 
-router.get("/feedback", async (req, res) => {
+router.post("/feedback", async (req, res) => {
   const { facultyId } = req.body;
   try {
+    console.log("collected ---<",facultyId)
     const facultyFeedback = await FeedbackSchema.find({ facultyId });
+    console.log(facultyFeedback)
     return res.json(facultyFeedback);
   } catch (error) {
     return res.status(500).json({ error: "Server Error" });
