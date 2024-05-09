@@ -9,6 +9,10 @@ const FeedbackSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  facultyId: {
+    type: String,
+    required: true,
+  }
 });
 
 module.exports = mongoose.model("FeedbackSchema", FeedbackSchema);
