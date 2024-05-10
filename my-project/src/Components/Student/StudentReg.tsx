@@ -1,128 +1,170 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import axios, { AxiosError } from "axios";
 import { Navigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface StudentRegForm {
   userID: string;
   userName: string;
   userEmail: string;
   userBranch: string;
-  userNumber: number;
+  userNumber: string;
   userPassword: string;
   confirmPassword: string;
-}
-
-interface IAxiosErrorRes {
-  data: {
-    message: string;
-  };
 }
 
 export default function StudentReg() {
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<StudentRegForm>();
+  const [formData, setFormData] = useState<StudentRegForm>({
+    userID: "",
+    userName: "",
+    userEmail: "",
+    userBranch: "",
+    userNumber: "",
+    userPassword: "",
+    confirmPassword: ""
+  });
+  const [errors, setErrors] = useState<Record<keyof StudentRegForm, string>>({
+    userID: "",
+    userName: "",
+    userEmail: "",
+    userBranch: "",
+    userNumber: "",
+    userPassword: "",
+    confirmPassword: ""
+  });
 
-  const onSubmit = (data: StudentRegForm) => {
-    setLoading(true);
-    axios
-      .post("http://localhost:8088/user/register", data)
-      .then((response) => {
-        alert(response.data);
-        setRegistered(true);
-      })
-      .catch((error: unknown) => {
-        const err = error as AxiosError;
-        if (err.response) {
-          const errorRes = err.response as IAxiosErrorRes;
-          alert(errorRes.data.message);
-        } else {
-          alert("Something went wrong");
-        }
-      });
-    setLoading(false);
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
   };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors: Partial<typeof errors> = {};
+
+    Object.keys(formData).forEach((key) => {
+      const fieldName = key as keyof StudentRegForm;
+      if (!formData[fieldName]) {
+        newErrors[fieldName] = `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+        isValid = false;
+      } else {
+        newErrors[fieldName] = "";
+      }
+    });
+
+    if (formData.userPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    setErrors(newErrors as typeof errors);
+    return isValid;
+  };
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (validateForm()) {
+      setLoading(true);
+      axios
+        .post("http://localhost:8088/user/register", formData)
+        .then((response) => {
+          toast.success("Registration Successfull"); // Display success toast
+          setRegistered(true);
+        })
+        .catch((error: AxiosError) => {
+          if (error.response) {
+            const errorRes = error.response.data as { message: string };
+            handleBackendErrors(errorRes);
+          } else {
+            alert("Something went wrong");
+          }
+        })
+        .finally(() => setLoading(false));
+    }
+  };
+
+  const handleBackendErrors = (errorRes: { message: string }) => {
+    const { message } = errorRes;
+    switch (message) {
+      case "Email already exists":
+        setErrors({ ...errors, userEmail: "Email already exists" });
+        break;
+      case "Password MisMacth":
+        setErrors({ ...errors, confirmPassword: "Passwords do not match" });
+        break;
+      default:
+        alert("An error occurred");
+        break;
+    }
+  };
+
   if (registered) {
     return <Navigate to="/student/login" />;
   }
+
   return (
     <div className="flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={onSubmit}
         className="max-w-sm mx-auto mt-8 bg-white rounded-lg shadow-md p-6"
       >
         <div className="mb-4">
-          <label
-            htmlFor="userID"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="userID" className="block text-gray-700 font-bold mb-2">
             User ID
           </label>
           <input
             type="text"
             id="userID"
-            {...register("userID", { required: true })}
+            value={formData.userID}
+            onChange={handleChange}
             className={`w-full p-2 border rounded ${
               errors.userID ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.userID && (
-            <span className="text-red-500">User ID is required</span>
-          )}
+          {errors.userID && <span className="text-red-500">{errors.userID}</span>}
         </div>
-        <div className="mb-4">
-          <label
-            htmlFor="userName"
-            className="block text-gray-700 font-bold mb-2"
-          >
+        
+<div className="mb-4">
+          <label htmlFor="userName" className="block text-gray-700 font-bold mb-2">
             User Name
           </label>
           <input
             type="text"
             id="userName"
-            {...register("userName", { required: true })}
+            value={formData.userName}
+            onChange={handleChange}
             className={`w-full p-2 border rounded ${
               errors.userName ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.userName && (
-            <span className="text-red-500">User Name is required</span>
-          )}
+          {errors.userName && <span className="text-red-500">{errors.userName}</span>}
         </div>
         <div className="mb-4">
-          <label
-            htmlFor="userEmail"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="userEmail" className="block text-gray-700 font-bold mb-2">
             User Email
           </label>
           <input
             type="email"
             id="userEmail"
-            {...register("userEmail", { required: true })}
+            value={formData.userEmail}
+            onChange={handleChange}
             className={`w-full p-2 border rounded ${
               errors.userEmail ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.userEmail && (
-            <span className="text-red-500">User Email is required</span>
-          )}
+          {errors.userEmail && <span className="text-red-500">{errors.userEmail}</span>}
         </div>
         <div className="mb-4">
-          <label
-            htmlFor="userBranch"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="userBranch" className="block text-gray-700 font-bold mb-2">
             User Branch
           </label>
           <select
             id="userBranch"
-            {...register("userBranch", { required: true })}
+            value={formData.userBranch}
+            onChange={handleChange}
             className={`w-full p-2 border rounded ${
               errors.userBranch ? "border-red-500" : "border-gray-300"
             }`}
@@ -139,67 +181,52 @@ export default function StudentReg() {
             </option>
             <option value="Civil Engineering">Civil Engineering</option>
           </select>
-
-          {errors.userBranch && (
-            <span className="text-red-500">User Branch is required</span>
-          )}
+          {errors.userBranch && <span className="text-red-500">{errors.userBranch}</span>}
         </div>
         <div className="mb-4">
-          <label
-            htmlFor="userNumber"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="userNumber" className="block text-gray-700 font-bold mb-2">
             Mobile Number
           </label>
           <input
             type="text"
             id="userNumber"
-            {...register("userNumber", { required: true })}
+            value={formData.userNumber}
+            onChange={handleChange}
             className={`w-full p-2 border rounded ${
               errors.userNumber ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.userNumber && (
-            <span className="text-red-500">User Number is required</span>
-          )}
+          {errors.userNumber && <span className="text-red-500">{errors.userNumber}</span>}
         </div>
         <div className="mb-4">
-          <label
-            htmlFor="userPassword"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="userPassword" className="block text-gray-700 font-bold mb-2">
             Password
           </label>
           <input
             type="password"
             id="userPassword"
-            {...register("userPassword", { required: true })}
+            value={formData.userPassword}
+            onChange={handleChange}
             className={`w-full p-2 border rounded ${
               errors.userPassword ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.userPassword && (
-            <span className="text-red-500">Password is required</span>
-          )}
+          {errors.userPassword && <span className="text-red-500">{errors.userPassword}</span>}
         </div>
         <div className="mb-4">
-          <label
-            htmlFor="confirmPassword"
-            className="block text-gray-700 font-bold mb-2"
-          >
+          <label htmlFor="confirmPassword" className="block text-gray-700 font-bold mb-2">
             Confirm Password
           </label>
           <input
             type="password"
             id="confirmPassword"
-            {...register("confirmPassword", { required: true })}
+            value={formData.confirmPassword}
+            onChange={handleChange}
             className={`w-full p-2 border rounded ${
               errors.confirmPassword ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.confirmPassword && (
-            <span className="text-red-500">Confirm Password is required</span>
-          )}
+          {errors.confirmPassword && <span className="text-red-500">{errors.confirmPassword}</span>}
         </div>
         <button
           type="submit"
@@ -219,3 +246,15 @@ export default function StudentReg() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+

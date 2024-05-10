@@ -1,37 +1,34 @@
 import { useContext, useState } from "react";
-import { useForm } from "react-hook-form";
 import { Link, Navigate } from "react-router-dom";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { UserContext } from "../../Types/StoresContext";
 import { ResponseToken } from "../../Types/FormDataTypes";
-interface StudentLoginProps {
-  userID: string;
-  userPassword: string;
-}
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
 
 export default function StudentLogin() {
   const { studentToken, login } = useContext(UserContext);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<StudentLoginProps>();
+  const [userID, setUserID] = useState("");
+  const [userPassword, setUserPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const onSubmit = (data: StudentLoginProps) => {
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     axios
-      .post("http://localhost:8088/user/login", data)
+      .post("http://localhost:8088/user/login", { userID, userPassword })
       .then((res: AxiosResponse<ResponseToken>) => {
         localStorage.setItem("studenttoken", res.data.token);
         login(res.data.token);
       })
       .catch((error: unknown) => {
         const axiosError = error as AxiosError;
-        const responseData =
-          axiosError?.response?.data ?? "Unknown error occurred";
-        setLoginError(responseData as string);
-        alert(responseData);
-        console.log(responseData);
+        const responseData:any = axiosError?.response?.data ?? { message: "Unknown error occurred" };
+        const errorMessage = typeof responseData === "string" ? responseData : responseData.message;
+        setLoginError(errorMessage);
+        toast.error(errorMessage); // Toast the error
+        console.log(errorMessage);
       });
   };
   if (studentToken) {
@@ -41,7 +38,7 @@ export default function StudentLogin() {
   return (
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={onSubmit}
         className="bg-white p-10 rounded-lg shadow-md"
       >
         <h2 className="text-3xl font-extrabold text-center mb-6 text-gray-800">
@@ -58,12 +55,13 @@ export default function StudentLogin() {
             Student ID
           </label>
           <input
-            {...register("userID", { required: true })}
             className="border rounded-lg px-3 py-2 w-full"
             type="text"
             id="userID"
+            value={userID}
+            onChange={(e) => setUserID(e.target.value)}
           />
-          {errors.userID && (
+          {!userID && (
             <p className="text-red-500 mt-1">Student ID is required</p>
           )}
         </div>
@@ -75,12 +73,13 @@ export default function StudentLogin() {
             Password
           </label>
           <input
-            {...register("userPassword", { required: true })}
             className="border rounded-lg px-3 py-2 w-full"
             type="password"
             id="userPassword"
+            value={userPassword}
+            onChange={(e) => setUserPassword(e.target.value)}
           />
-          {errors.userPassword && (
+          {!userPassword && (
             <p className="text-red-500 mt-1">Password is required</p>
           )}
         </div>

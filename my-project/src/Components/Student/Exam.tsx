@@ -2,6 +2,10 @@ import { useParams } from "react-router-dom";
 import useExam from "./useExam";
 import { useState, useEffect, useRef, useMemo } from "react";
 import ScoreCard from "./ScoreCard";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 type UserAnswers = { [key: string]: string };
 export default function Exam() {
   const { id } = useParams();
@@ -14,17 +18,19 @@ export default function Exam() {
     facultyName,
     randomQuestions,
   } = useExam(id as string);
+  const [studentID] = useState(localStorage.getItem("studentid"));
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
   const [timeRemaining, setTimeRemaining] = useState(duration * 60);
   const [timeTaken, setTimeTaken] = useState<number>(0);
+  const [submitted,setSubmitted]=useState<boolean>(false)
+
 
   useEffect(() => {
     setTimeRemaining(duration * 60);
   }, [duration]);
 
   const intervalIdRef = useRef<number | null>(null);
-  console.log(timeRemaining);
   useEffect(() => {
     if (timeRemaining <= 0 || currentQuestionIndex >= randomQuestions.length) {
       clearInterval(intervalIdRef.current as number);
@@ -32,6 +38,10 @@ export default function Exam() {
       intervalIdRef.current = setInterval(() => {
         setTimeRemaining((timeRemaining) => timeRemaining - 1);
       }, 1000) as unknown as number;
+    }
+
+    if(timeRemaining<=0&&currentQuestionIndex>1){
+      handleSubmit();
     }
 
     return () => clearInterval(intervalIdRef.current as number);
@@ -45,7 +55,12 @@ export default function Exam() {
   };
 
   const handleNextQuestion = () => {
+    if(currentQuestionIndex === randomQuestions.length - 1){
+      handleSubmit();
+    }
+    else{
     setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
   };
 
   const handlePrevQuestion = () => {
@@ -66,12 +81,41 @@ export default function Exam() {
     );
 
     const timeTaken = duration * 60 - timeRemaining;
+    if(!submitted)
     setTimeTaken(timeTaken);
 
     return score;
   }, [duration, timeRemaining, randomQuestions, userAnswers]);
 
-  if (timeRemaining <= 0 || currentQuestionIndex >= randomQuestions.length) {
+  const handleSubmit = async () => {
+    const data = {
+      studentID: studentID,
+      SubjectID: subjectID,
+      SubjectName: subjectName,
+      totalQuestions: totalQuestions,
+      duration: duration,
+      timeTaken: timeTaken,
+      marks: marks,
+      score: score,
+      facultyName: facultyName,
+    };
+    console.log(data);
+
+    try {
+      const res = await axios.patch(
+        `http://localhost:8088/user/submit/result/${studentID}`,
+        { Results: [data] }
+      );
+      toast.success("Exam result submitted successfully!");
+      setSubmitted(true);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  if (submitted) {
+    
     return (
       <ScoreCard
         subjectID={subjectID}
@@ -86,7 +130,7 @@ export default function Exam() {
     );
   }
 
-  const currentQuestion = randomQuestions[currentQuestionIndex];
+  const currentQuestion = randomQuestions[currentQuestionIndex]||{question:"",answers:[]};
 
   return (
     <>
@@ -128,8 +172,8 @@ export default function Exam() {
                 value={index}
                 onChange={() => handleAnswerSelect(currentQuestionIndex, index)}
                 checked={
-                  userAnswers[currentQuestionIndex].toString() ===
-                  index.toString()
+                  userAnswers[currentQuestionIndex] !== undefined &&
+                  userAnswers[currentQuestionIndex].toString() === index.toString()
                 }
                 className="form-radio h-5 w-5 text-blue-600"
               />

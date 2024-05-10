@@ -114,41 +114,46 @@ export default function ResultsTable() {
               </tr>
             </thead>
             <tbody>
-              {filteredResults.map((result, index) => (
-                <tr key={result._id}>
-                  <td className="border px-4 py-2">{index + 1}</td>
-                  <td className="border px-4 py-2">
-                    {result.Results[0].studentID}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {result.Results[0].SubjectID}
-                  </td>
-                  <td className="border px-4 py-2">{subjectName}</td>
-                  <td className="border px-4 py-2">
-                    {result.Results[0].totalQuestions}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {result.Results[0].duration} Minutes
-                  </td>
-                  <td className="border px-4 py-2">
-                    {result.Results[0].timeTaken} seconds
-                  </td>
-                  <td className="border px-4 py-2">
-                    {result.Results[0].score}
-                  </td>
-                  <td
-                    className={
-                      result.Results[0].score / result.Results[0].marks >= 0.35
-                        ? "text-green-500 border px-4 py-2"
-                        : "text-red-500 border px-4 py-2"
-                    }
-                  >
-                    {result.Results[0].score / result.Results[0].marks >= 0.35
-                      ? "Passed"
-                      : "Failed"}
-                  </td>
-                </tr>
-              ))}
+              {filteredResults.map((result, index) => {
+                console.log(result.Results[0].score)
+                console.log(result.Results[0].marks)
+                return (
+                  <tr key={result._id}>
+                    <td className="border px-4 py-2">{index + 1}</td>
+                    <td className="border px-4 py-2">
+                      {result.Results[0].studentID}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {result.Results[0].SubjectID}
+                    </td>
+                    <td className="border px-4 py-2">{subjectName}</td>
+                    <td className="border px-4 py-2">
+                      {result.Results[0].totalQuestions}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {result.Results[0].duration} Minutes
+                    </td>
+                    <td className="border px-4 py-2">
+                      {result.Results[0].timeTaken} seconds
+                    </td>
+                    <td className="border px-4 py-2">
+                      {result.Results[0].score}
+                    </td>
+                    <td
+                      className={
+                        result.Results[0].score / result.Results[0].marks >= 0.35
+                          ? "text-green-500 border px-4 py-2"
+                          : "text-red-500 border px-4 py-2"
+                      }
+                    >
+                      {result.Results[0].score / result.Results[0].marks >= 0.35
+                        ? "Passed"
+                        : "Failed"}
+                    </td>
+
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

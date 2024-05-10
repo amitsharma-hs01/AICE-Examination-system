@@ -10,12 +10,15 @@ import AdminRoutesConfig from "./Routes/AdminRoutes";
 import FacultyRoutesConfig from "./Routes/FacultyRoutes";
 import StudentRoutesConfig from "./Routes/StudentRoutes";
 import useFaculty from "./Components/Faculty/useFaculty";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <UserProvider>
       <FacultyProvider>
         <AdminProvider>
+          <ToastContainer/>
           <BrowserRouter>
             <Routes>
               <Route path="/*" element={<PublicRouteConfig />} />

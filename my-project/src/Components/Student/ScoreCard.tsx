@@ -1,7 +1,5 @@
 import classNames from "classnames";
-import { useState } from "react";
-import axios from "axios";
-import { Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 interface Props {
   subjectID: string;
   subjectName: string;
@@ -17,44 +15,22 @@ export default function ScoreCard({
   subjectName,
   duration,
   totalQuestions,
-  marks,
   score,
   timeTaken,
-  facultyName,
 }: Props) {
-  const [studentID] = useState(localStorage.getItem("studentid"));
-  const [resultSubmited, setResultSubmited] = useState(false);
+  // const [studentID] = useState(localStorage.getItem("studentid"));
+  // const [resultSubmited, setResultSubmited] = useState(false);
   const minutes = Math.floor(timeTaken / 60);
   const seconds = timeTaken % 60;
-  const handleSubmit = async () => {
-    const data = {
-      studentID: studentID,
-      SubjectID: subjectID,
-      SubjectName: subjectName,
-      totalQuestions: totalQuestions,
-      duration: duration,
-      timeTaken: timeTaken,
-      marks: marks,
-      score: score,
-      facultyName: facultyName,
-    };
-    console.log(data);
 
-    try {
-      const res = await axios.patch(
-        `http://localhost:8088/user/submit/result/${studentID}`,
-        { Results: [data] }
-      );
-      alert("Exam result submitted successfully!");
-      setResultSubmited(true);
-      console.log(res);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  if (resultSubmited) {
-    return <Navigate to="/student/dashboard" />;
-  }
+
+  // 
+  
+
+  
+  // if (resultSubmited) {
+  //   return <Navigate to="/student/dashboard" />;
+  // }
 
   return (
     <div
@@ -159,6 +135,7 @@ export default function ScoreCard({
               Your score is: {score}
             </h2>
             <div className={classNames("text-center", "my-4")}>
+              <Link to={"/student/dashboard"}>
               <button
                 className={classNames(
                   "bg-blue-500",
@@ -168,10 +145,10 @@ export default function ScoreCard({
                   "rounded-md",
                   "hover:bg-blue-600"
                 )}
-                onClick={void handleSubmit}
               >
-                Submit
+                Dashboard
               </button>
+              </Link>
             </div>
           </div>
         </div>

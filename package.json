@@ -1,9 +1,10 @@
 {
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "react-toastify": "^10.0.5"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"cd Backend && nodemon app\" \"cd my-project && npm run dev\""    
+    "start": "concurrently \"cd Backend && nodemon app\" \"cd my-project && npm run dev\""
   }
 }
